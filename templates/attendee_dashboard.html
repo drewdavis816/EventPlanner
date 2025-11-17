@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendee Dashboard</title>
+     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Attendee Dashboard</h1>
+            <p>Welcome, <strong>{{ username }}</strong></p>
+            <a href="/" class="btn btn-secondary">Logout</a>
+        </div>
+
+        <div class="my-events-section">
+            <h2>My Events</h2>
+            {% if my_events %}
+                <div class="events-grid">
+                    {% for event_name in my_events %}
+                        <div class="event-card rsvp-card">
+                            <h3>{{ event_name }}</h3>
+                            <p class="rsvp-status">✅ You're RSVP'd</p>
+                            <form method="POST" action="/cancel_rsvp">
+                                <input type="hidden" name="event_name" value="{{ event_name }}">
+                                <button type="submit" class="btn btn-danger">Cancel RSVP</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-message">You haven't RSVP'd to any events yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="available-events-section">
+            <h2>Available Events</h2>
+            {% if events %}
+                <div class="events-grid">
+                    {% for event_name, event_data in events.items() %}
+                        {% if username not in event_data.attendees %}
+                            <div class="event-card">
+                                <h3>{{ event_name }}</h3>
+                                <p><strong>Spots Available:</strong> {{ event_data.max_attendees - event_data.attendees|length }} / {{ event_data.max_attendees }}</p>
+
+                                {% if event_data.attendees|length < event_data.max_attendees %}
+                                    <form method="POST" action="/rsvp_event">
+                                        <input type="hidden" name="event_name" value="{{ event_name }}">
+                                        <button type="submit" class="btn btn-primary">RSVP</button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-disabled" disabled>Event Full</button>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-message">No events available.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
